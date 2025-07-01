@@ -1,0 +1,28 @@
+# Copyright 2024 ETH Zurich and University of Bologna
+# Solderpad Hardware License, Version 0.51, see LICENSE for details.
+# SPDX-License-Identifier: SHL-0.51
+
+package:
+  name: pjon_hw
+  authors:
+    - "Pius Sieber <pisieber@student.ethz.ch>"
+
+dependencies:
+  common_cells:         { git: "https://github.com/pulp-platform/common_cells.git",         version: 1.38.0  }
+  common_verification:  { git: "https://github.com/pulp-platform/common_verification.git",  version: 0.2.5  }
+  axi_stream:           { git: "https://github.com/pulp-platform/axi_stream.git",           version: 0.1.1  } 
+
+export_include_dirs:
+  - include
+
+sources:
+  - target: not(fpga)
+    files:
+      # Level 0
+      - pjdl.sv
+      - pjdl_send.sv
+      - pjdl_receive.sv
+
+  - target: any(simulation, verilator)
+    files:
+      - tb_pjdl.sv

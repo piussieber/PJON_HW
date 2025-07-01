@@ -1,0 +1,10 @@
+.bender
+doc
+pickle
+sources*.json
+bender
+morty
+work
+modelsim.ini
+transcript
+*.wlf
