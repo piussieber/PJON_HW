@@ -22,6 +22,7 @@ sources:
       - pjdl.sv
       - pjdl_send.sv
       - pjdl_receive.sv
+      - pjon_addressing.sv
 
   - target: any(simulation, verilator)
     files:
