@@ -80,7 +80,7 @@ module pjon_addressing #(
         ack_receiving_active_d = ack_receiving_active_q;
         if (start_ack_receiving_i) begin 
             ack_receiving_active_d = 1'b1;
-        end else if (axis_write_req_i.tvalid && axis_write_rsp_o.tready) begin  
+        end else if (axis_write_req_o.tvalid && axis_write_rsp_i.tready) begin  
             ack_receiving_active_d = 1'b0; // reset when ack-packet is processed
         end
     end
