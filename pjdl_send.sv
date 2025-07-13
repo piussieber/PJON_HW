@@ -37,7 +37,7 @@ module pjdl_send #(
 );
     `include "common_cells/registers.svh"
 
-    typedef enum logic [2:0] {Idle, Sync, Data, PrepareAck, SendAckReq, Disabled} send_state_t;
+    typedef enum logic [2:0] {Idle, Sync, Data, PrepareAck, SendAckReq, Disabled, SendDelay} send_state_t;
     send_state_t send_state_q, send_state_d;
     logic [3:0] bit_counter_q, bit_counter_d;
     logic [19:0] clk_counter_q, clk_counter_d; // 20 bits for a maximum preamble size of 11000us 
@@ -57,6 +57,7 @@ module pjdl_send #(
     logic pjon_out_q, pjon_out_d;
     logic start_ack_receiving_q, start_ack_receiving_d;
     logic go_to_idle_q, go_to_idle_d;
+    logic go_to_send_delay_q, go_to_send_delay_d;
 
     // Specification index constants
     localparam int unsigned PJDL_PREAMB   = 0;  // PJDL Preamble bit
@@ -68,7 +69,7 @@ module pjdl_send #(
     assign axis_read_rsp_o.tready = !buffer_full && rst_ni;
 
     assign sending_in_progress_o = !((send_state_q == Idle)
-        || (send_state_q == Disabled));
+        || (send_state_q == Disabled) || (send_state_q == SendDelay));
     assign start_ack_receiving_o = start_ack_receiving_q;
 
     assign pjon_o = pjon_out_q;
@@ -188,6 +189,14 @@ module pjdl_send #(
                                                      // is already at the right level
             end
         end
+        if(send_state_q == SendDelay) begin
+            pjon_out_d = 1'b0;
+            clk_counter_limit_d = {6'h0, pjdl_spec_pad_i*2}; // Delay with length of one pad-bit
+            bit_counter_d = 1'b0;
+            if(clk_counter_q == clk_counter_limit_q)begin
+                clk_counter_limit_d = '0;
+            end
+        end
     end
 
 
@@ -200,10 +209,18 @@ module pjdl_send #(
         send_byte_d = send_byte_q;
         current_is_last_d = current_is_last_q;
         go_to_idle_d = go_to_idle_q;
+        go_to_send_delay_d = go_to_send_delay_q;
 
         if((clk_counter_q == clk_counter_limit_q) && go_to_idle_q) begin
             go_to_idle_d = 1'b0;
             send_state_d = Idle;
+        end
+        if((clk_counter_q == clk_counter_limit_q) && go_to_send_delay_q) begin
+            go_to_send_delay_d = 1'b0;
+            send_state_d = SendDelay;
+        end
+        if(send_state_q == SendDelay) begin
+            go_to_idle_d = 1'b1;
         end
 
         // sync or byte done, ready to load next byte ?
@@ -214,9 +231,11 @@ module pjdl_send #(
                 if(next_is_empty_last) begin
                     pop_next_byte_d = 1'b1;
                 end
-                if((current_is_last_q==1'b1) || (next_is_ack_req) || (next_is_empty_last)) begin
-                    current_is_last_d = 1'b0;
+                if(next_is_ack_req) begin
                     go_to_idle_d = 1'b1;
+                end else if ((current_is_last_q==1'b1) || (next_is_empty_last)) begin
+                    current_is_last_d = 1'b0;
+                    go_to_send_delay_d = 1'b1;
                 end else begin
                     send_state_d = Data;
                     if(buffer_empty == 1'b1) begin
@@ -270,7 +289,7 @@ module pjdl_send #(
                     end
                 end
                 if({4'b0, bit_counter_q}/2 == send_byte_q) begin // timeout defined by input value
-                    send_state_d = Idle;
+                    go_to_idle_d = 1'b1;
                 end
             end
 
@@ -283,6 +302,10 @@ module pjdl_send #(
                 send_byte_d = 0;
                 current_is_last_d = 0;
                 go_to_idle_d = 1'b0;
+            end
+
+            SendDelay: begin
+                pjon_en_o =  1'b0;
             end
         endcase
 
@@ -301,4 +324,5 @@ module pjdl_send #(
     `FF(pjon_out_q, pjon_out_d, '0);
     `FF(start_ack_receiving_q, start_ack_receiving_d, '0);
     `FF(go_to_idle_q, go_to_idle_d, '0);
+    `FF(go_to_send_delay_q, go_to_send_delay_d, '0);
 endmodule

@@ -202,7 +202,7 @@ module tb_pjdl #(
         pjdl_module_send(8'h03, 1'b0);
         pjdl_module_send(8'hF0, 1'b1);
         
-        #(5ms);
+        //#(5ms);
 
         // Next frame
         pjdl_module_send(8'h05, 1'b0);
