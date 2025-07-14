@@ -191,8 +191,8 @@ module pjdl_send #(
         end
         if(send_state_q == SendDelay) begin
             pjon_out_d = 1'b0;
-            clk_counter_limit_d = {6'h0, pjdl_spec_pad_i*2}; // Delay with length of one pad-bit
-            bit_counter_d = 1'b0;
+            clk_counter_limit_d = pjdl_spec_pad_i*2; // Delay with length of one pad-bit
+            bit_counter_d = '0;
             if(clk_counter_q == clk_counter_limit_q)begin
                 clk_counter_limit_d = '0;
             end
