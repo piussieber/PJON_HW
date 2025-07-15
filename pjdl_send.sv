@@ -69,7 +69,7 @@ module pjdl_send #(
     assign axis_read_rsp_o.tready = !buffer_full && rst_ni;
 
     assign sending_in_progress_o = !((send_state_q == Idle)
-        || (send_state_q == Disabled) || (send_state_q == SendDelay));
+        || (send_state_q == Disabled));
     assign start_ack_receiving_o = start_ack_receiving_q;
 
     assign pjon_o = pjon_out_q;
