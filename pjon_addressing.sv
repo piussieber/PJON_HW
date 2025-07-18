@@ -52,6 +52,13 @@ module pjon_addressing #(
     assign axis_write_rsp_o.tready = !buffer_full;
     assign axis_write_req_o.tvalid = !buffer_empty && !data_irrelevant_q && preprocessing_done_q;
 
+    // assign unused signals
+    assign axis_write_req_o.t.strb = '0;
+    assign axis_write_req_o.t.keep = 8'hFF; // keep all bytes
+    assign axis_write_req_o.t.id = '0;
+    assign axis_write_req_o.t.dest = '0;
+    assign axis_write_req_o.t.user = '0;
+
     // FIFO buffer to save received bytes until they can be sent further to wrapper
     fifo_v3 #(
         .DATA_WIDTH(9), // 1 bit for tlast and 8 bits for data
