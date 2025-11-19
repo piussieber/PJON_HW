@@ -148,7 +148,7 @@ in the future.
 
 ## Processor integration
 As part of this project, the PJDL module was also integrated into the [Croc-SoC](https://github.com/pulp-platform/croc), together with a Direct Memory Access Module (DMA). All the necessary libraries to work with PJON where developed as well. \
-The whole integration including the software are planned to be published at a later date.
+The full project intecrating this module into Croc-SoC can be found in the [pjon_on_croc](https://github.com/piussieber/pjon_on_croc) repository.
 
 ## Bender
 This project works with the dependency manager [Bender](https://github.com/pulp-platform/bender). To make it as easy as possible to reuse this module, the submodules are included in this repository as well. They can be found in the .bender folder. To update them, Bender is required.
