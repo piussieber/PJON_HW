@@ -39,13 +39,19 @@ module tb_pjdl #(
 
     axis_req_t axis_send_req;
     axis_rsp_t axis_send_rsp;
+    axis_req_t axis_send_interconnect_req;
+    axis_rsp_t axis_send_interconnect_rsp;
     
     axis_rsp_t axis_receive_rsp;
     axis_req_t axis_receive_req;
+    axis_rsp_t axis_receive_interconnect_rsp;
+    axis_req_t axis_receive_interconnect_req;
 
     logic receive_frame_active;
     logic [7:0] received_byte;
     logic received_byte_valid;
+
+    logic start_ack_receiving;
 
 
     //////////////
@@ -140,6 +146,39 @@ module tb_pjdl #(
     ////////////
     //  DUT   //
     ////////////
+    pjon_addressing #(
+        .BufferSize(1),
+
+        .axis_req_t(axis_req_t),
+        .axis_rsp_t(axis_rsp_t)
+    ) i_pjon_addressing(
+        .clk_i                    ( clk                     ),
+        .rst_ni                   ( rst_n                   ),
+
+        // send-axi-connection to wrapper
+        .axis_read_req_i          ( axis_send_req      ),
+        .axis_read_rsp_o          ( axis_send_rsp      ),
+
+        // send-axi-connection from layer 2 module
+        .axis_read_req_o          ( axis_send_interconnect_req ),
+        .axis_read_rsp_i          ( axis_send_interconnect_rsp ),
+
+        // receive-axi-connection from layer 2 module
+        .axis_write_rsp_o         ( axis_receive_interconnect_rsp ),
+        .axis_write_req_i         ( axis_receive_interconnect_req ),
+
+        // receive-axi-connection to wrapper
+        .axis_write_rsp_i         ( axis_receive_rsp   ),
+        .axis_write_req_o         ( axis_receive_req   ),
+
+        .start_ack_receiving_i    ( start_ack_receiving  ), // when ack_receiving is active, 
+                                                      // address checking isn't needed
+
+        // PJON Settings
+        .pjon_device_id_i         ( 8'b1 ), // PJON Address 1
+        .router_mode_i            ( 1'b1 )
+    );
+
     pjdl #(
         .BufferSize(2), // size of the FIFO buffer, minimum size is 1
         .axis_req_t(axis_req_t),
@@ -149,13 +188,14 @@ module tb_pjdl #(
         .rst_ni                     ( rst_n              ),
 
         // sending
-        .axis_read_req_i            ( axis_send_req      ),
-        .axis_read_rsp_o            ( axis_send_rsp      ),
+        .axis_read_req_i            ( axis_send_interconnect_req      ),
+        .axis_read_rsp_o            ( axis_send_interconnect_rsp      ),
         .sending_in_progress_o      (                    ),
+        .start_ack_receiving_o      ( start_ack_receiving),
 
         // receiving
-        .axis_write_rsp_i           ( axis_receive_rsp    ),
-        .axis_write_req_o           ( axis_receive_req    ),
+        .axis_write_rsp_i           ( axis_receive_interconnect_rsp    ),
+        .axis_write_req_o           ( axis_receive_interconnect_req    ),
         .receiving_in_progress_o    (                     ),
 
         // HW interface
@@ -227,7 +267,7 @@ module tb_pjdl #(
 
         pjdl_send_preamble();
         pjdl_frame_init(1);
-        pjdl_send_byte(8'h01, 1);
+        pjdl_send_byte(8'h02, 1);
         pjdl_send_byte(8'h02, 1);
         pjdl_send_byte(8'h03, 1);
         pjdl_send_byte(8'h04, 1);

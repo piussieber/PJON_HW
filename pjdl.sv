@@ -26,6 +26,7 @@ module pjdl #(
 
     output logic sending_in_progress_o,
     output logic receiving_in_progress_o,
+    output logic start_ack_receiving_o,
 
     // HW interface
     input   logic pjon_i,
@@ -40,6 +41,8 @@ module pjdl #(
 );
 
     logic start_ack_receiving;
+
+    assign start_ack_receiving_o = start_ack_receiving;
 
     pjdl_send #(
         .BufferSize(BufferSize),
