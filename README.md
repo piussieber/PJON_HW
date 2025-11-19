@@ -113,7 +113,7 @@ used as a router. The functionality is called "router mode" in the software impl
 and we included it in our implementation as well. It can be activated with an input
 signal to the pjon-addressing module.
 
-### Inputs and Outputs
+### PJON-Adressing Inputs and Outputs
 The following table lists all the input and outputs of the pjon-addressing module:
 | Signal | Direction | Width / Type | Description |
 |---|---:|---:|---|
@@ -132,7 +132,7 @@ It is important to mention, that the axi-stream connection in sending direction 
 route these signals through the modules was made to simplify possible future addition of
 PJON layer 3 functionality inside the addressing module.
 
-### Parameters
+### PJON-Addressing Parameters
 There are also a few parameters the pjon_addressing module can be configured with:
 * AXI-Stream types: Parameter inputs for the AXI-stream types. This helps to
 keep the AXI-stream type the same over all different modules and makes it easy
