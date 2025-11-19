@@ -95,6 +95,57 @@ The PJDL module features one buffer in each direction on the AXI-stream interfac
 #### AXI Stream types
 The `axis_req_t` and `axis_rsp_t` type parameters are the inputs for the AXI-stream types. They define the with of all the signals that are part of the axi-stream interface. Of course all the different sizes have to be set in the correct way as described above, to work properly. Still having these types as parameters makes it easier as the typedefs only have to be done once. To define them in the correct way, the following code segment can be used:
 
+## PJON Addressing
+PJON-Addressing is a seperate module added to the project later. It is not part of the PJDL module but can be connected directly in series to the PJON-Module (on the axi-stream connection).\
+The purpose of the PJON-Addressing module is to filter out data that is not meant for the current device. In PJON networks with a lot of devices this can increase the performance significantly.\
+PJON-addressing is designed as a seperate module as its functionallity belongs to layer 3 of PJON and thus not to PJDL.
+
+The pjon_addressing module inspects always the first packet of every transfer coming
+from the PJDL module. This first packet contains the id of the receiving device. If the
+address is correct, the packet is forwarded further through axi-stream. If the address is wrong and the
+packet is thus meant for an other device, the pjon-addressing-module drops the packet
+and doesn’t forward it.\
+PJON also implements an option to broadcast messages to many
+devices. This is done with the broadcast id 255. Every packet received for this address is thus also accepted and forwarded.
+The original library includes also an option to deactivate the address filtering and receive
+all packets coming in. This is useful for debugging purposes and if the device should be
+used as a router. The functionality is called "router mode" in the software implementation
+and we included it in our implementation as well. It can be activated with an input
+signal to the pjon-addressing module.
+
+### Inputs and Outputs
+The following table lists all the input and outputs of the pjon-addressing module:
+| Signal | Direction | Width / Type | Description |
+|---|---:|---:|---|
+| `axis_read_req_i` | input | `axis_req_t` | AXI‑Stream input from wrapper |
+| `axis_read_rsp_o` | output | `axis_rsp_t` | AXI‑Stream response to wrapper |
+| `axis_read_req_o` | output | `axis_req_t` | AXI‑Stream request to wrapper |
+| `axis_read_rsp_i` | input | `axis_rsp_t` | AXI‑Stream response from wrapper |
+| `axis_read_req_i` | input | `axis_req_t` | AXI‑Stream input from layer 2 module |
+| `axis_read_rsp_o` | output | `axis_rsp_t` | AXI‑Stream response to layer 2 module |
+| `axis_read_req_o` | output | `axis_req_t` | AXI‑Stream request to layer 2 module |
+| `axis_read_rsp_i` | input | `axis_rsp_t` | AXI‑Stream response from layer 2 module |
+| `pjon_device_id_i` | input | `[7:0]` | 8‑bit PJON device ID |
+| `router_mode_i` | input | `1` | Activates router mode (accepts all packets) |
+
+It is important to mention, that the axi-stream connection in sending direction is directly routed through the module without any change or buffer in between. The choice to still
+route these signals through the modules was made to simplify possible future addition of
+pjon layer 3 functionality inside the addressing module.
+
+### Parameters
+There are also a few parameters the pjon_addressing module can be configured with:
+* AXI-Stream types: Parameter inputs for the AXI-stream types. This helps to
+keep the AXI-stream type the same over all different modules and makes it easy
+to change small details on the bus if need be. 
+* Buffer Size: The pjon_addressing module includes a buffer in the receiving direction,
+as the data is actively processed in that direction. Per default, the size of the
+buffer is set to one as this is all that is needed to process that data in real-time.
+In the current implementation it probably doesn’t make sense to increase its size.
+Considering that, a buffer wouldn’t have been absolutely necessary and a simple
+register would be sufficient. It was much simpler to implement it with a buffer
+tough and this also makes it easy to add more functionality for the layer 3 hardware
+in the future.
+
 ## Processor integration
 As part of this project, the PJDL module was also integrated into the [Croc-SoC](https://github.com/pulp-platform/croc), together with a Direct Memory Access Module (DMA). All the necessary libraries to work with PJON where developed as well. \
 The whole integration including the software are planned to be published at a later date.
