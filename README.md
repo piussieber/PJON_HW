@@ -96,7 +96,7 @@ The PJDL module features one buffer in each direction on the AXI-stream interfac
 The `axis_req_t` and `axis_rsp_t` type parameters are the inputs for the AXI-stream types. They define the with of all the signals that are part of the axi-stream interface. Of course all the different sizes have to be set in the correct way as described above, to work properly. Still having these types as parameters makes it easier as the typedefs only have to be done once. To define them in the correct way, the following code segment can be used:
 
 ## PJON Addressing
-PJON-Addressing is a seperate module added to the project later. It is not part of the PJDL module but can be connected directly in series to the PJON-Module (on the axi-stream connection).\
+PJON-addressing is a seperate module added to the project later. It is not part of the PJDL module but can be connected directly in series to the PJON-Module (on the axi-stream connection).\
 The purpose of the PJON-Addressing module is to filter out data that is not meant for the current device. In PJON networks with a lot of devices this can increase the performance significantly.\
 PJON-addressing is designed as a seperate module as its functionallity belongs to layer 3 of PJON and thus not to PJDL.
 
@@ -125,12 +125,12 @@ The following table lists all the input and outputs of the pjon-addressing modul
 | `axis_read_rsp_o` | output | `axis_rsp_t` | AXI‑Stream response to layer 2 module |
 | `axis_read_req_o` | output | `axis_req_t` | AXI‑Stream request to layer 2 module |
 | `axis_read_rsp_i` | input | `axis_rsp_t` | AXI‑Stream response from layer 2 module |
-| `pjon_device_id_i` | input | `[7:0]` | 8‑bit PJON device ID |
-| `router_mode_i` | input | `1` | Activates router mode (accepts all packets) |
+| `pjon_device_id_i` | input | `logic`, 8 bit | 8‑bit PJON device-id |
+| `router_mode_i` | input | `logic`, 1 bit | Activates router mode (accepts all packets) |
 
 It is important to mention, that the axi-stream connection in sending direction is directly routed through the module without any change or buffer in between. The choice to still
 route these signals through the modules was made to simplify possible future addition of
-pjon layer 3 functionality inside the addressing module.
+PJON layer 3 functionality inside the addressing module.
 
 ### Parameters
 There are also a few parameters the pjon_addressing module can be configured with:
