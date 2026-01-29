@@ -1,7 +1,8 @@
 # PJDL Hardware Module
 
 This is a hardware implementation of the [PJDL](https://github.com/gioblu/PJON/blob/master/src/strategies/SoftwareBitBang/specification/PJDL-specification-v5.0.md) data link.  PJDL is a single-wire data link protocol and belongs to the [PJON](https://github.com/gioblu/PJON) network protocol.
-This hardware module was writen as part of my bachelors project at [ETH](https://ethz.ch/de.html).
+This hardware module was writen as part of my bachelors project at [ETH](https://ethz.ch/de.html).\
+An example of a complete processor including this module can be found on the [PJON_ON_CROC repository](https://github.com/piussieber/pjon_on_croc).
 
 ## Why
 The PJON protocol including the PJDL data link in the [main repository](https://github.com/gioblu/PJON) is written in C++. This is great as it is very flexible and allows the protocol to run on a wide range of different devices. It however brings the disadvantage, that the micro controllers have to poll often on the bus, to not miss anything coming in. They also need a lot of time sending and receiving data.
